@@ -86,7 +86,9 @@ public class LiverpoolE2ETest extends BaseTest {
     }
 
     public static void main(String[] args) {
-        System.setProperty("headed", "true");
+   
+        String modoHeaded = System.getProperty("headed", "false");
+        System.out.println(">>> Modo de ejecución: " + (modoHeaded.equals("true") ? "HEADED (visible)" : "HEADLESS (invisible)"));
 
         TestNG testng = new TestNG();
         testng.setTestClasses(new Class[] { LiverpoolE2ETest.class });
