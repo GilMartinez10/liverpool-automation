@@ -10,44 +10,39 @@ import java.util.Arrays;
 
 /**
  * Clase encargada de inicializar y cerrar el navegador Playwright.
- * Cumple con el requerimiento de ejecutarse en modo 'headless' por defecto
+ * ejecucion en modo 'headless' por defecto
  * y permitir modo 'headed' mediante la propiedad del sistema -Dheaded=true.
  */
 public class FabricaNavegador {
 
-    // ThreadLocal garantiza que si corremos pruebas en paralelo, cada hilo tenga su propio navegador
+  
     private static final ThreadLocal<Playwright> hiloPlaywright = new ThreadLocal<>();
     private static final ThreadLocal<Browser> hiloNavegador = new ThreadLocal<>();
     private static final ThreadLocal<BrowserContext> hiloContexto = new ThreadLocal<>();
     private static final ThreadLocal<Page> hiloPagina = new ThreadLocal<>();
 
-    /**
-     * Inicializa Playwright, el Navegador, el Contexto y la Página.
-     * Retorna la instancia de Page lista para interactuar.
-     */
+  
     public static Page iniciarNavegador() {
-        // Leemos si el usuario pasó el parámetro -Dheaded=true por consola. Por defecto es "false" (headless)
+      
         String parametroHeaded = System.getProperty("headed", "false");
         boolean esModoVisible = Boolean.parseBoolean(parametroHeaded);
 
-        // 1. Iniciar Playwright
         Playwright playwright = Playwright.create();
         hiloPlaywright.set(playwright);
 
-        // 2. Opciones de lanzamiento
         BrowserType.LaunchOptions opcionesLanzamiento = new BrowserType.LaunchOptions()
-                .setHeadless(!esModoVisible) // Si esModoVisible es false, setHeadless será true
+                .setHeadless(!esModoVisible) 
                 .setArgs(Arrays.asList(
                         "--start-maximized",
                         "--disable-blink-features=AutomationControlled",
                         "--no-sandbox"
                 ));
 
-        // 3. Lanzar navegador Chromium
+        
         Browser navegador = playwright.chromium().launch(opcionesLanzamiento);
         hiloNavegador.set(navegador);
 
-        // 4. Crear un contexto con resolución estándar y configuración de idioma de México
+    
         Browser.NewContextOptions opcionesContexto = new Browser.NewContextOptions()
                 .setViewportSize(1366, 768)
                 .setLocale("es-MX")
@@ -56,27 +51,23 @@ public class FabricaNavegador {
 
         BrowserContext contexto = navegador.newContext(opcionesContexto);
         
-        // Evitamos que el sitio detecte que es un bot automatizado
+
         contexto.addInitScript("Object.defineProperty(navigator, 'webdriver', {get: () => undefined});");
         hiloContexto.set(contexto);
 
-        // 5. Crear la nueva página
+        
         Page pagina = contexto.newPage();
         hiloPagina.set(pagina);
 
         return pagina;
     }
 
-    /**
-     * Obtiene la página activa del hilo actual.
-     */
+   
     public static Page obtenerPagina() {
         return hiloPagina.get();
     }
 
-    /**
-     * Cierra de forma segura todos los recursos de Playwright del hilo actual.
-     */
+   
     public static void cerrarNavegador() {
         try {
             if (hiloPagina.get() != null) {

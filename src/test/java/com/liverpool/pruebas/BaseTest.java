@@ -7,10 +7,7 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Listeners;
 
-/**
- * Clase base para todas las clases de prueba.
- * Conecta el oyente de capturas automáticas y administra el ciclo de vida del navegador.
- */
+
 @Listeners(OyentePruebas.class)
 public abstract class BaseTest {
 

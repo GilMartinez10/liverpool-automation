@@ -13,11 +13,7 @@ import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-/**
- * Listener de TestNG que vigila la ejecución de las pruebas.
- * Cumple con el requerimiento de capturas automáticas ante fallos:
- * "Automatic screenshots on failure configured through the framework, not captured manually in test code."
- */
+
 public class OyentePruebas implements ITestListener {
 
     @Override
@@ -38,11 +34,11 @@ public class OyentePruebas implements ITestListener {
         Page pagina = FabricaNavegador.obtenerPagina();
         if (pagina != null) {
             try {
-                // 1. Capturar los bytes de la pantalla completa para Allure
+               
                 byte[] screenshotBytes = pagina.screenshot(new Page.ScreenshotOptions().setFullPage(true));
                 adjuntarScreenshotAllure(screenshotBytes, nombrePrueba);
 
-                // 2. Guardar también una copia física en target/screenshots/
+                
                 String timestamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
                 String carpeta = "target/screenshots/";
                 Files.createDirectories(Paths.get(carpeta));
