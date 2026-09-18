@@ -1,0 +1,50 @@
+name: Liverpool Playwright E2E Tests
+
+# Se ejecuta automáticamente en cada push o pull request a las ramas principales
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch: # Permite ejecutar el flujo manualmente desde la interfaz de GitHub
+
+jobs:
+  pruebas-e2e:
+    name: Ejecutar Pruebas E2E e Intercepcion de Red
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      # 1. Descarga el código del repositorio
+      - name: Descargar codigo fuente (Checkout)
+        uses: actions/checkout@v4
+
+      # 2. Configura Java 17 en el servidor de GitHub
+      - name: Configurar JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: 'maven'
+
+      # 3. Instala los navegadores y librerías de sistema que Playwright necesita en Linux
+      - name: Instalar navegadores de Playwright
+        run: |
+          mvn exec:java -e -D exec.mainClass=com.microsoft.playwright.CLI -D exec.args="install --with-deps chromium"
+
+      # 4. Ejecuta las pruebas en modo HEADLESS (sin ventana gráfica)
+      - name: Ejecutar pruebas en modo Headless
+        run: |
+          mvn clean test -Dheaded=false
+
+      # 5. Sube los reportes de prueba y capturas de pantalla como Artifact de GitHub
+      - name: Subir reportes y evidencias como artefacto
+        if: always() # Se ejecuta aunque la prueba falle para poder ver las capturas
+        uses: actions/upload-artifact@v4
+        with:
+          name: reporte-ejecucion-liverpool
+          path: |
+            target/surefire-reports/
+            target/screenshots/
+          if-no-files-found: ignore
+          retention-days: 14
